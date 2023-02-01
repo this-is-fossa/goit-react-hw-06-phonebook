@@ -1,44 +1,49 @@
 import { useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { getContacts } from 'redux/contactSelectors';
+import { addContact } from 'redux/contactsSlice';
 import PropTypes from 'prop-types';
 import { Form, FormTitle, Input, FormBtn } from './ContactForm.styled';
 
-export function ContactForm({ contacts, onSubmit }) {
+export function ContactForm() {
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
 
+  const contacts = useSelector(getContacts);
+  const dispatch = useDispatch();
+
   const handleInputChange = e => {
-    const { name, value } = e.target;
-
-    switch (name) {
-      case 'name':
-        setName(value);
-        break;
-
-      case 'number':
-        setNumber(value);
-        break;
-
-      default:
-        return;
+    if (e.currentTarget.name === 'name') {
+      setName(e.currentTarget.value);
     }
+
+    if (e.currentTarget.name === 'number') {
+      setNumber(e.currentTarget.value);
+    }
+  };
+
+  function isSameContact(name, number) {
+    return (
+      contacts.find(
+        contact =>
+          contact.name.toLowerCase().trim() === name.toLowerCase().trim()
+      ) || contacts.find(contact => contact.number.trim() === number.trim())
+    );
+  }
+
+  const newContact = (name, number) => {
+    const contact = {
+      name,
+      number,
+    };
+    isSameContact(name, number)
+      ? alert('This contact is already exists')
+      : dispatch(addContact(contact));
   };
 
   const handleSubmit = e => {
     e.preventDefault();
-
-    if (
-      contacts.find(contact =>
-        contact.name.toLowerCase().includes(name.toLowerCase())
-      )
-    ) {
-      alert(`${name} is already is contact`);
-    } else {
-      onSubmit(name, number);
-      reset();
-    }
-  };
-
-  const reset = () => {
+    newContact(name, number);
     setName('');
     setNumber('');
   };
@@ -78,5 +83,4 @@ ContactForm.propTypes = {
       number: PropTypes.string.isRequired,
     })
   ),
-  onSubmit: PropTypes.func.isRequired,
 };

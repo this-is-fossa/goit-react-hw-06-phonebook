@@ -1,23 +1,39 @@
-import PropTypes from 'prop-types';
-import { CardList, Card, DeleteBtn } from './ContactList.styled';
+import { useDispatch, useSelector } from 'react-redux';
+import { getContacts, getFilter } from 'redux/contactSelectors';
+import { deleteContacts } from 'redux/contactsSlice';
+import { ListTitle, CardList, Card, DeleteBtn } from './ContactList.styled';
 
-export const ContactList = ({ contacts, onDeleteContact }) => (
-  <CardList>
-    {contacts.map(({ id, name, number }) =>
-      <Card key={id}>
-        <p>{name}: {number}</p>
-        <DeleteBtn type='button' onClick={() => onDeleteContact(id)}>Delete</DeleteBtn>
-      </Card>,
-    )}</CardList>
-);
+export const ContactList = () => {
+  const contacts = useSelector(getContacts);
+  const filter = useSelector(getFilter);
+  const dispatch = useDispatch();
 
-ContactList.propTypes = {
-  contacts: PropTypes.arrayOf(
-    PropTypes.exact({
-      id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-      number: PropTypes.string.isRequired,
-    }),
-  ),
-  onDeleteContact: PropTypes.func.isRequired,
+  function filteredContacts() {
+    const normalValue = filter.toLowerCase().trim();
+    return contacts.filter(contact =>
+      contact.name.toLowerCase().includes(normalValue)
+    );
+  }
+
+  return (
+    <div>
+      <ListTitle>Contacts list</ListTitle>
+      <CardList>
+        {filteredContacts().length > 0 &&
+          filteredContacts().map(({ name, number, id }) => (
+            <Card key={id}>
+              <p>
+                {name}: {number}
+              </p>
+              <DeleteBtn
+                type="button"
+                onClick={() => dispatch(deleteContacts(id))}
+              >
+                Delete
+              </DeleteBtn>
+            </Card>
+          ))}
+      </CardList>
+    </div>
+  );
 };

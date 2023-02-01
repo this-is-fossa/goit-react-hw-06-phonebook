@@ -1,8 +1,12 @@
 import styled from '@emotion/styled';
 
+export const ListTitle = styled.h1`
+  margin-left: 100px;
+`;
+
 export const CardList = styled.ul`
   width: 350px;
-  margin-left: 10px;
+  margin-left: 100px;
   padding: 0;
 `;
 
